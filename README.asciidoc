@@ -7,6 +7,15 @@ and organizations to compose meaningful pipelines with minimal glue.
 
 Work in progress.
 
+=== Goals
+
+The goal of this repository is to have a simple way to share reusable parts
+that our CI/CD pipeline uses in Bash, Haskell/Turtle, and other supported
+_scripting_ environments.
+
+At the moment we just have Bash function libraries but only because they were
+already built and vetted.
+
 === License
 
 Zedtech is released under the BSD 3-clause license. See link:LICENSE[].

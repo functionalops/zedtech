@@ -1,0 +1,13 @@
+== zedtech
+
+A set of scripts, automation, and toolkit that provides a way for services
+and organizations to compose meaningful pipelines with minimal glue.
+
+=== Status
+
+Work in progress.
+
+=== License
+
+Zedtech is released under the BSD 3-clause license. See link:LICENSE[].
+

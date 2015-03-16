@@ -18,6 +18,27 @@ function z_git_changed_files() {
   git diff-index --diff-filter="${filter}" --name-only --cached "${remote}/${branch}" -- "${subdir}"
 }
 
+# how far do we want to go with wrapping? (should users be able to run these
+# commands against multiple gerrit repos and it can determine context?
+# should we wrap the commit process like git flow does?)
+# function z_git_repo_root() {}
+# function z_git_check_local_commits() {
+# function z_git_check_untracked() {
+
+function z_git_current_branch() {
+  git rev-parse --abbrev-ref HEAD
+}
+
+function z_git_last_commit() {
+  declare -r commit_id=$(git log | head -1 | awk '{ print $2 }')
+  if [ -z "$commit_id" ]; then
+    >&2 echo "Error: unable to find last commit"
+    return 1
+  else
+    echo "$commit_id"
+  fi
+}
+
 function z_git_removed_files() {
   z_git_changed_files "${1:-.}" "D" "${2:-origin}" "${3:-master}"
 }
@@ -39,6 +60,7 @@ function z_git_clean_clone_workspace() {
 }
 
 if [ "${BASH_SOURCE[0]}" != "$0" ]; then
+  export -f z_git_last_commit
   export -f z_git_changed_files
   export -f z_git_removed_files
   export -f z_git_added_files

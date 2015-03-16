@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $Z_BASH_LIB/env.sh
+. $Z_BASH_LIB/gerrit.functions
+. $Z_BASH_LIB/git.functions
+
+declare -r help_message="Usage: $(basename $0) [-d] reviewer[s]
+  -h|--help - this help
+  -d|--debug - debug
+  -c|--commit commitish - commit to comment on, defaults to last commit in repo
+  reviewer[s] - people you want to add to the review
+
+Adds people to the review"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h)
+      echo "$usage"
+      exit 0
+    ;;
+    -c|--commit)
+      if [ -z "$2" ]; then
+        >&2 echo "Error: need a commit id"
+        z_bash_help_stderr "$help_message"
+        exit 1
+      fi
+      declare -r commit="$2"
+      shift
+    ;;
+    -d)
+      set -x
+      declare -r debug_flag="-d"
+    ;;
+    *)
+      break
+    ;;
+  esac
+  shift
+done
+
+if [ -z "$commit" ]; then
+  declare -r commit=$(z_git_last_commit)
+fi
+
+if [ -n "$@" ]; then
+  for reviewer in $@; do
+    z_gerrit_reviewer_add $reviewer $commit $debug_flag
+  done
+else
+  echo "ERROR: need some reviewers, yo" >&2
+fi

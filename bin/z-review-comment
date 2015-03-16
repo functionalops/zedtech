@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $Z_BASH_LIB/env.sh
+. $Z_BASH_LIB/gerrit.functions
+. $Z_BASH_LIB/git.functions
+
+declare -r help_message="Usage: $(basename $0) [-d][-c commit] comment
+  -h|--help - this help
+  -c|--commit commitish - commit to comment on, defaults to last commit in repo
+  -d|--debug - debug
+
+Comment on a review"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h|--help)
+      z_bash_help_stdout "$help_message"
+      exit 0
+    ;;
+    -c|--commit)
+      if [ -z "$2" ]; then
+        >&2 echo "Error: need a commit id"
+        z_bash_help_stderr "$help_message"
+        exit 1
+      fi
+      declare -r commit="$2"
+      shift
+    ;;
+    -d|--debug)
+      set -x
+      declare -r debug_flag="-d"
+    ;;
+    *)
+      break
+    ;;
+  esac
+  shift
+done
+
+if [ -z "$commit" ]; then
+  declare -r commit=$(z_git_last_commit)
+fi
+
+if [ -n "$@" ]; then
+  z_gerrit_comment $commit "$@" $debug_flag
+else
+  echo "ERROR: need some comments" >&2
+fi

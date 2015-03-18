@@ -20,6 +20,14 @@ function z_bash_test_script() {
   bash -n "${path}"
 }
 
+function z_bash_help_stderr() {
+  >&2 echo "$1"
+} 
+
+function z_bash_help_stdout() {
+  echo "$1"
+} 
+
 function z_bash_check_scripts() {
   # Again checking the number of arguments passed in is equal to the number
   # expected and if not, will report to stderr the usage to aid debugging.
@@ -90,6 +98,8 @@ function z_bash_check_required_files_exist() {
 }
 
 if [ "${BASH_SOURCE[0]}" != "$0" ]; then
+  export -f z_bash_help_stdout
+  export -f z_bash_help_stderr
   export -f z_bash_test_script
   export -f z_bash_check_scripts
 else

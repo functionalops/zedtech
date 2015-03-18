@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Purpose: provide reusable gerrit related functions for shell scripts
+
+function gerrit_ssh() {
+  local -r gerrit_host="$1"
+  local -r gerrit_command="$2"
+  ssh -T -o BatchMode=yes ${gerrit_host} gerrit "$gerrit_command"
+}
+
+# ci stuff would use this too, like so:
+function z_gerrit_verify() {
+
+  local -r commit_id="$1"
+  local -r vote="$2"
+  local -r message="$3"
+  local -r debug="${4:-}"
+
+  z-gerrit $debug review --message "'$message'" --verified $vote -- $commit_id
+}
+
+function z_gerrit_comment() {
+  local -r commit_id="$1"
+  local -r comment="$2"
+  local -r debug="${3:-}"
+  z-gerrit $debug review --message "'$comment'" -- ${commit_id}
+}
+
+function z_gerrit_reviewer_add() {
+  local -r reviewer="$1"
+  local -r commit_id="$2"
+  local -r debug="${3:-}"
+  z-gerrit $debug set-reviewers --add ${reviewer} -- ${commit_id}
+}
+
+function z_gerrit_host() {
+  if [ -z "$Z_GERRIT_HOST" ]; then
+    local -r gerrit_host=$(git config --get remote.gerrit.url | sed 's/:.*//')
+    if [ -z "$gerrit_host" ]; then
+      >&2 echo "Error: can't find gerrit_host"
+      return 1
+    else
+      echo $gerrit_host
+    fi
+  else
+    echo "$Z_GERRIT_HOST"
+  fi
+}
+
+if [ "${BASH_SOURCE[0]}" != "$0" ]; then
+  export -f z_gerrit_comment
+  export -f z_gerrit_host
+  export -f z_gerrit_reviewer_add
+  export -f z_gerrit_verify
+else
+  >&2 echo "Error: executing ${0} intended to be sourced...nothing to do."
+  exit 1
+fi

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $Z_BASH_LIB/env.sh
+. $Z_BASH_LIB/gerrit.functions
+
+
+declare -r help_message="Usage: $(basename $0) [-d] [gerrit_command]
+  -h|--help - this help
+  -d|--debug - debug
+  gerrit_command - the command to execute via the gerrit SSH interface
+
+Executes the given gerrit command. Details about supported commands
+can be found in the documentation:
+https://gerrit.googlecode.com/svn/documentation/2.0/cmd-index.html"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h|--help)
+      z_bash_help_stdout "$help_message"
+      exit 0
+    ;;
+    -d|--debug)
+      set -x
+    ;;
+    *)
+      break
+    ;;
+  esac
+  shift
+done
+
+declare -r gerrit_host=$(z_gerrit_host)
+
+if [ -n "$1" ]; then
+  declare -r gerrit_command="$@"
+else
+  declare -r gerrit_command="--help"
+fi
+
+gerrit_ssh $gerrit_host "$gerrit_command"
